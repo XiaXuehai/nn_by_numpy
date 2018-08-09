@@ -28,7 +28,7 @@ def predict(model, X):
 
     return np.argmax(probs, axis=1)
 
-def build_model(nn_hidden_dim, X, epoch=20000):
+def build_model(nn_hidden_dim, X, epoch=2000):
     np.random.seed(0)
     w1 = np.random.randn(nn_input_dim, nn_hidden_dim)/np.sqrt(nn_input_dim)
     b1 = np.zeros((1, nn_hidden_dim))
