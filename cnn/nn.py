@@ -8,12 +8,12 @@ import pooling
 import numpy as np
 
 class nn(object):
-    loss_funs = dic(
+    loss_funs = dict(
         cross_ent=loss_func.cross_entropy
         )
 
     dloss_funs = dict(
-        cross_entropy=loss_func.dcross_entropy
+        cross_ent=loss_func.dcross_entropy
         )
 
     forward_nolins = dict(
@@ -35,7 +35,11 @@ class nn(object):
         self.mode = 'classification'
 
     def train_step(self, X_train, y_train):
-        pass
+        y_pred, cache = self.forward(X_train, train=True)
+        loss = self.loss_funs[self.loss](self.model, y_pred, y_train, self.lam)
+        grad = self.backward(y_pred, y_train, cache)
+
+        return grad, loss
 
     def predict_proba(self, X):
         pass
@@ -92,7 +96,7 @@ class ConvNet(nn):
         dpool = pooling.maxpool_backward(dh2, hpool_cache)
 
         # conv-1
-        dh1 = self.backward_nolin(dh2, nl_cache1)
+        dh1 = self.backward_nolin(dpool, nl_cache1)
         dx, dw1, db1 = conv.conv_backward(dh1, h1_cache)
 
         grad = dict(

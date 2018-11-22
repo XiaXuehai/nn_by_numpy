@@ -1,43 +1,43 @@
 # coding:utf-8
 import numpy as np
-import struct
 import matplotlib.pyplot as plt
 
 
-def readfile():
+def read_mnist():
+    im = get_image()
+    label = get_label()
+    return im, label
+
+
+def get_image():
     with open('mnist_data/train-images-idx3-ubyte','rb') as f1:
         buf1 = f1.read()
-    with open('mnist_data/train-labels-idx1-ubyte','rb') as f2:
-        buf2 = f2.read()
-    return buf1, buf2
 
+    image_size = 28
+    image_index = 16 # the first 16bytes is four I type
+    img = np.ndarray(len(buf1) - image_index, '>B', buf1, image_index)
+    im = img.reshape(-1, 1,image_size, image_size)
 
-def get_image(buf1, idx):
-    image_index = 0
-    image_index += struct.calcsize('>IIII')
-    im = []
-    for i in range(9):
-        temp = struct.unpack_from('>784B', buf1, image_index) # '>784B'的意思就是用大端法读取784个unsigned byte
-        im.append(np.reshape(temp,(28,28)))
-        image_index += struct.calcsize('>784B')  # 每次增加784B
     return im
 
 
-def get_label(buf2, idx): # 得到标签数据
-    label_index = 0
-    label_index += struct.calcsize('>II')
-    return struct.unpack_from('>9B', buf2, label_index)
+def get_label():
+    with open('mnist_data/train-labels-idx1-ubyte','rb') as f2:
+        buf2 = f2.read()
+
+    label_index = 8 # the first 8bytes is two I type
+    label = np.ndarray(len(buf2) - label_index, '>B', buf2, label_index)
+
+    return label
 
 
 if __name__ == "__main__":
-    image_data, label_data = readfile()
-    im = get_image(image_data)
-    label = get_label(label_data)
+    im, label = read_mnist()
 
     for i in range(9):
         plt.subplot(3, 3, i + 1)
-        title = u"标签对应为："+ str(label[i])
-        plt.title(title, fontproperties='SimHei')
+        title = 'label:'+ str(label[i])
+        plt.title(title)
         plt.imshow(im[i], cmap='gray')
     plt.show()
 

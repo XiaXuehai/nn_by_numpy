@@ -3,7 +3,7 @@
 import numpy as np
 
 def relu_forward(x):
-    out = np.maximum(x, 0)
+    out = np.maximum(x, 0) #compare with 0
     cache = x
     return out, x
 
@@ -21,7 +21,7 @@ def fc_backward(dout, cache):
     w, h = cache
 
     dW = h.T @ dout
-    db = np.sum(h, axis=0)
+    db = np.sum(dout, axis=0)
     dX = dout @ w.T
 
     return dX, dW, db

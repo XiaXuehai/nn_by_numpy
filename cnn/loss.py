@@ -2,20 +2,28 @@
 
 import numpy as np
 
+
+def onehot(labels):
+    y = np.zeros((labels.size, np.max(labels)+1))
+    y[range(labels.size), labels] = 1
+    return y
+
+
 def softmax(x):
     # be careful about T ==> (3,2) and (2,)
     e_x = np.exp((x.T - np.max(x, axis=1)).T)
     return (e_x.T / e_x.sum(axis=1)).T
 
+
 def regularization(model, reg_type='l2', lam=1e-3):
     pass
 
 
-
-def cross_entorpy(model, y_pred, y_train, lam=1e-3):
+def cross_entropy(model, y_pred, y_train, lam=1e-3):
     m = y_pred.shape[0]
 
     # y_train is one-hot
+    # y_train = onehot(y_train)
     prob = softmax(y_pred)
     log_like = -np.log(prob[range(m), y_train])
 
@@ -24,6 +32,7 @@ def cross_entorpy(model, y_pred, y_train, lam=1e-3):
 
     return data_loss #+ reg_loss
 
+# https://blog.csdn.net/Gipsy_Danger/article/details/81292148
 def dcross_entropy(y_pred, y_train):
     m = y_pred.shape[0]
 
