@@ -25,7 +25,7 @@ def cross_entropy(model, y_pred, y_train, lam=1e-3):
     # y_train is one-hot
     # y_train = onehot(y_train)
     prob = softmax(y_pred)
-    log_like = -np.log(prob[range(m), y_train])
+    log_like = -np.log(prob[range(m), y_train] + 1e-20)
 
     data_loss = np.sum(log_like) / m
     #reg_loss = regularization(model, reg_type='l2', lam=lam)

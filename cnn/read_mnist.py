@@ -9,8 +9,8 @@ def read_mnist():
     return im, label
 
 
-def get_image():
-    with open('mnist_data/train-images-idx3-ubyte','rb') as f1:
+def get_image(path):
+    with open(path,'rb') as f1:
         buf1 = f1.read()
 
     image_size = 28
@@ -21,8 +21,8 @@ def get_image():
     return im
 
 
-def get_label():
-    with open('mnist_data/train-labels-idx1-ubyte','rb') as f2:
+def get_label(path):
+    with open(path,'rb') as f2:
         buf2 = f2.read()
 
     label_index = 8 # the first 8bytes is two I type
@@ -32,7 +32,7 @@ def get_label():
 
 
 if __name__ == "__main__":
-    im, label = read_mnist()
+    im, label = get_image('mnist_data/train-images-idx3-ubyte'), get_label('mnist_data/train-labels-idx1-ubyte')
 
     for i in range(9):
         plt.subplot(3, 3, i + 1)

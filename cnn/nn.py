@@ -42,10 +42,12 @@ class nn(object):
         return grad, loss
 
     def predict_proba(self, X):
-        pass
+        score, _ = self.forward(X, False)
+        return loss_func.softmax(score)
 
     def predict(self, X):
-        pass
+        temp = self.predict_proba(X)
+        return np.argmax(temp, axis=1)
 
     def forward(self, X, train=False):
         raise NotImplementedError()

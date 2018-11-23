@@ -1,17 +1,18 @@
 # coding:utf-8
+
 import numpy as np
-from sklearn.utils import shuffle as skshuffle
 
 
 def get_minibatch(x, y, minibatch_size, shuffle=True):
     minibatches=[]
 
-    if shuffle:
-        x, y = skshuffle(x, y)
+    # get random index for shuffle
+    r = np.random.permutation(len(x))
 
     for i in range(0, x.shape[0], minibatch_size):
-        x_mini = x[i:i+minibatch_size]
-        y_mini = y[i:i+minibatch_size]
+        idx = r[i:i+minibatch_size]
+        x_mini = x[idx]
+        y_mini = y[idx]
         minibatches.append((x_mini, y_mini))
 
     return minibatches
@@ -36,7 +37,6 @@ def sgd(nn, x_train, y_train, val_set=None, lr=1e-3, mb_size=256, n_iter=2000, p
                 print('Iter-{} loss: {:.4f}'.format(iter, loss))
 
         for layer in grad:
-            # alpha is learning step
             nn.model[layer] -= lr * grad[layer]
 
     return nn
