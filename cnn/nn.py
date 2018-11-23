@@ -89,9 +89,11 @@ class ConvNet(nn):
 
         # fc-1
         dh3, dw3, db3 = l.fc_backward(grad_y, score_cache)
+        #dw3 += loss_func.dl2_reg(self.model['W3'], self.lam)
         dh3 = self.backward_nolin(dh3, nl_cache3)
 
         dh2, dw2, db2 = l.fc_backward(dh3, h3_cache)
+        #dw2 += loss_func.dl2_reg(self.model['W2'], self.lam)
         dh2 = dh2.ravel().reshape(hpool.shape)
 
         # pool-1
@@ -100,6 +102,7 @@ class ConvNet(nn):
         # conv-1
         dh1 = self.backward_nolin(dpool, nl_cache1)
         dx, dw1, db1 = conv.conv_backward(dh1, h1_cache)
+        #dw1 += loss_func.dl2_reg(self.model['W1'], self.lam)
 
         grad = dict(
             W1=dw1, W2=dw2, W3=dw3, b1=db1, b2=db2, b3=db3

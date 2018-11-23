@@ -4,14 +4,14 @@ from read_mnist import *
 from solver import *
 import nn
 
-n_iter = 1000
+
 lr = 1e-3
 mb_size = 64
 epoch = 3
 print_after = 10
 loss = 'cross_ent'
 nonlin = 'relu'
-solver = 'sgd'
+solver = 'adam'
 
 def main():
 
@@ -21,7 +21,11 @@ def main():
     M, D, C = x_train.shape[0], x_train.shape[1], y_train.max()+1
 
     solvers = dict(
-        sgd = sgd
+        sgd = sgd,
+        momentum=momentum,
+        adagrad=adagrad,
+        rmsprop=rmsprop,
+        adam=adam
     )
 
     solver_fun = solvers[solver]
@@ -34,7 +38,7 @@ def main():
         print('Epoch-{}'.format(k+1))
         net = solver_fun(
             net, x_train, y_train, val_set=None, mb_size=mb_size, lr=lr,
-            n_iter=n_iter, print_after=print_after
+            print_after=print_after
         )
 
         y_pred = net.predict(x_test)
