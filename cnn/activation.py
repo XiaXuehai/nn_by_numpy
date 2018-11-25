@@ -77,6 +77,17 @@ def bn_backward(dout, cache):
 
     return dx, dgamma, dbeta
 
+
+def dropout_forward(x, p_dropout):
+    u = np.random.binomial(1, p_dropout, size=x.shape) / p_dropout
+    out = x * u
+    cache = u
+    return out, cache
+
+def dropout_backward(dout, cache):
+    dx = dout * cache
+    return dx
+
 if __name__ == '__main__':
     pass
 
