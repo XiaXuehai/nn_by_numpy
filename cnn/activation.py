@@ -82,7 +82,8 @@ def bn_backward(dout, cache):
 
 
 def dropout_forward(x, p_dropout):
-    u = np.random.binomial(1, p_dropout, size=x.shape) / p_dropout
+    u = np.random.binomial(1, p_dropout, size=x.shape)
+    u /= p_dropout # rescale the output,correct the expectation of output
     out = x * u
     cache = u
     return out, cache
