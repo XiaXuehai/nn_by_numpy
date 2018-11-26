@@ -16,6 +16,7 @@ def fc_backward(dout, cache):
 
     return dX, dW, db
 
+
 def relu_forward(x):
     out = np.maximum(x, 0) #compare with 0
     cache = x
@@ -25,6 +26,7 @@ def relu_backward(dout, cache):
     dX = dout.copy()
     dX[cache<=0] = 0
     return dX
+
 
 # leaky relu
 def lrelu_forward(x, a=1e-3):
@@ -37,6 +39,7 @@ def lrelu_backward(dout, cache):
     dx = dout.copy()
     dx[x<0] *= a
     return dx
+
 
 # https://blog.csdn.net/yuechuen/article/details/71502503
 def bn_forward(x, gamma, beta, cache, momentum=0.9, train=True):
