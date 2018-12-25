@@ -15,8 +15,8 @@ solver = 'adam'
 
 def main():
 
-    x_train, y_train = get_image('mnist_data/train-images-idx3-ubyte'), get_label('mnist_data/train-labels-idx1-ubyte')
-    x_test, y_test = get_image('mnist_data/t10k-images-idx3-ubyte'), get_label('mnist_data/t10k-labels-idx1-ubyte')
+    x_train, y_train = get_image('../mnist_data/raw/train-images-idx3-ubyte'), get_label('../mnist_data/raw/train-labels-idx1-ubyte')
+    x_test, y_test = get_image('../mnist_data/raw/t10k-images-idx3-ubyte'), get_label('../mnist_data/raw/t10k-labels-idx1-ubyte')
 
     M, D, C = x_train.shape[0], x_train.shape[1], y_train.max()+1
 
