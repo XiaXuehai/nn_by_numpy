@@ -2,30 +2,19 @@
 import torch
 import torchvision
 import torchvision.models as models
+from torchvision import utils
 
+from graphviz import Digraph
 import numpy as np
-
-def test():
-    model = models.resnet18()
-    print(model.layer1[0].conv1.weight.data)
-
-    print(model.layer1[0].conv1.__class__)  # <class 'torch.nn.modules.conv.Conv2d'>
-    print(model.layer1[0].conv1.kernel_size)
-
-    input = torch.randn(20, 16, 50, 100)
-    print(input.size())
-    print(np.prod(input.size()))
+from matplotlib import pyplot as plt
 
 
 def print_model_parm_nums(model):
     total = sum([param.nelement() for param in model.parameters()])
     print('  + Number of params: %.2fM' % (total / 1e6))
 
-# model = models.alexnet()
-# print_model_parm_nums(model)
 
-
-def print_model_parm_flops():
+def print_model_parm_flops(x, model):
 
     multiply_adds = False
     list_conv = []
@@ -79,7 +68,7 @@ def print_model_parm_flops():
 
     def foo(net):
         childrens = list(net.children())
-        if not childrens:
+        if len(childrens)==0:
             if isinstance(net, torch.nn.Conv2d):
                 net.register_forward_hook(conv_hook)
             if isinstance(net, torch.nn.Linear):
@@ -94,17 +83,14 @@ def print_model_parm_flops():
         for c in childrens:
             foo(c)
 
-    resnet = models.alexnet()
-    foo(resnet)
-    input = torch.rand(3, 224, 224).unsqueeze(0)
-    out = resnet(input)
-
+    foo(model)
+    y = model(x)
     total_flops = (sum(list_conv) + sum(list_linear) + sum(list_bn) + sum(list_relu) + sum(list_pooling))
 
     print('  + Number of FLOPs: %.2fG' % (total_flops / 1e9))
 
 
-# print_model_parm_flops()
+
 
 ### 打印一层的输入?
 def print_forward():
@@ -147,11 +133,8 @@ def print_value():
     print("grads['y']: {}".format(grads['y']))
     print(grads['z'])
 
-# print_value()
 
-def print_layers_num():
-    resnet = models.resnet18()
-
+def print_layers_num(model):
     def foo(net):
         childrens = list(net.children())
         if not childrens:
@@ -164,13 +147,11 @@ def print_layers_num():
         for c in childrens:
             count += foo(c)
         return count
-    print(foo(resnet))
-
-# print_layers_num()
+    print(foo(model))
 
 
 # 打印每层信息 + weights维度 + bias维度 + parameters总数
-def check_summary():
+def check_summary(model):
     def torch_summarize(model, show_weights=True, show_parameters=True):
         """Summarizes torch model by showing trainable parameters and weights."""
         from torch.nn.modules.module import _addindent
@@ -200,9 +181,7 @@ def check_summary():
         tmpstr = tmpstr + ')'
         return tmpstr
 
-    # Test
-    import torchvision.models as models
-    model = models.alexnet()
+
     print(torch_summarize(model))
 
 # check_summary()
@@ -210,7 +189,7 @@ def check_summary():
 
 # https://gist.github.com/wassname/0fb8f95e4272e6bdd27bd7df386716b7
 # summarize a torch model like in keras, showing parameters and output shape
-def show_summary():
+def show_summary(input, model):
     from collections import OrderedDict
     import pandas as pd
     import numpy as np
@@ -327,42 +306,11 @@ def show_summary():
 
         return df_summary
 
-    # Test on alexnet
-    import torchvision.models as models
-    model = models.alexnet()
-    df = torch_summarize_df(input_size=(3, 224, 224), model=model)
+    df = torch_summarize_df(input_size=input.shape[1:], model=model)
     print(df)
 
 
-# # Output
-#              name class_name        input_shape       output_shape  nb_params
-# 1     features=>0     Conv2d  (-1, 3, 224, 224)   (-1, 64, 55, 55)      23296#nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
-# 2     features=>1       ReLU   (-1, 64, 55, 55)   (-1, 64, 55, 55)          0
-# 3     features=>2  MaxPool2d   (-1, 64, 55, 55)   (-1, 64, 27, 27)          0
-# 4     features=>3     Conv2d   (-1, 64, 27, 27)  (-1, 192, 27, 27)     307392
-# 5     features=>4       ReLU  (-1, 192, 27, 27)  (-1, 192, 27, 27)          0
-# 6     features=>5  MaxPool2d  (-1, 192, 27, 27)  (-1, 192, 13, 13)          0
-# 7     features=>6     Conv2d  (-1, 192, 13, 13)  (-1, 384, 13, 13)     663936
-# 8     features=>7       ReLU  (-1, 384, 13, 13)  (-1, 384, 13, 13)          0
-# 9     features=>8     Conv2d  (-1, 384, 13, 13)  (-1, 256, 13, 13)     884992
-# 10    features=>9       ReLU  (-1, 256, 13, 13)  (-1, 256, 13, 13)          0
-# 11   features=>10     Conv2d  (-1, 256, 13, 13)  (-1, 256, 13, 13)     590080
-# 12   features=>11       ReLU  (-1, 256, 13, 13)  (-1, 256, 13, 13)          0
-# 13   features=>12  MaxPool2d  (-1, 256, 13, 13)    (-1, 256, 6, 6)          0
-# 14  classifier=>0    Dropout         (-1, 9216)         (-1, 9216)          0
-# 15  classifier=>1     Linear         (-1, 9216)         (-1, 4096)   37752832
-# 16  classifier=>2       ReLU         (-1, 4096)         (-1, 4096)          0
-# 17  classifier=>3    Dropout         (-1, 4096)         (-1, 4096)          0
-# 18  classifier=>4     Linear         (-1, 4096)         (-1, 4096)   16781312
-# 19  classifier=>5       ReLU         (-1, 4096)         (-1, 4096)          0
-# 20  classifier=>6     Linear         (-1, 4096)         (-1, 1000)    4097000
-
-
 def show_save_tensor():
-    import torch
-    from torchvision import utils
-    import torchvision.models as models
-    from matplotlib import pyplot as plt
 
     def vis_tensor(tensor, ch=0, all_kernels=False, nrow=8, padding=2):
         '''
@@ -391,9 +339,10 @@ def show_save_tensor():
     vgg = models.resnet18(pretrained=True)
     mm = vgg.double()
     filters = mm.modules
-    body_model = [i for i in mm.children()][0]
+    body_model = [i for i in mm.children()]
     # layer1 = body_model[0]
-    layer1 = body_model
+    layer1 = list(body_model[4].children())[0]
+    layer1 = list(layer1.children())[0]
     tensor = layer1.weight.data.clone()
     vis_tensor(tensor)
     save_tensor(tensor, 'test.png')
@@ -403,10 +352,8 @@ def show_save_tensor():
     plt.show()
 
 
-def print_autograd_graph():
+def print_autograd_graph(y, model):
     from graphviz import Digraph
-    import torch
-    from torch.autograd import Variable
 
     def make_dot(var, params=None):
         """ Produces Graphviz representation of PyTorch autograd graph
@@ -462,20 +409,24 @@ def print_autograd_graph():
         add_nodes(var.grad_fn)
         return dot
 
-    from torchvision import models
-
-    torch.manual_seed(1)
-    inputs = torch.randn(1, 3, 224, 224)
-    model = models.resnet18(pretrained=False)
-    y = model(Variable(inputs))
-    # print(y)
 
     g = make_dot(y, params=model.state_dict())
     g.view()
 
-
-print_autograd_graph()
+# import os
+# os.environ["PATH"] += os.pathsep + 'D:/Program Files (x86)/Graphviz2.38/bin/'
+# print_autograd_graph()
 
 if __name__ == '__main__':
-    import fire
-    fire.Fire()
+    model = models.alexnet()
+    print_model_parm_nums(model)
+
+    x = torch.rand(1, 3, 224, 224)
+    print_model_parm_flops(x, model)
+
+    print_layers_num(model)
+
+    check_summary(model)
+    show_summary(x, model)
+
+    show_save_tensor()
