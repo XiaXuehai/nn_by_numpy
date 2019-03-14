@@ -353,7 +353,6 @@ def show_save_tensor():
 
 
 def print_autograd_graph(y, model):
-    from graphviz import Digraph
 
     def make_dot(var, params=None):
         """ Produces Graphviz representation of PyTorch autograd graph

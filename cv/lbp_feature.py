@@ -16,15 +16,13 @@ def lbp(a):
 			code |= (a[i+1][j+1] >= x) << 3
 			code |= (a[i+1][j  ] >= x) << 2
 			code |= (a[i+1][j-1] >= x) << 1
-			code |= (a[i  ][j-1] >= x) << 6
+			code |= (a[i  ][j-1] >= x) << 0
 			b[i][j] = code
 	return b
 
-a = cv2.imread('../img_1.jpg')
-a = cv2.cvtColor(a, cv2.COLOR_RGB2GRAY)
-print(a.shape)
-cv2.imshow('aa',a)
-cv2.waitKey()
-b = lbp(a)
-cv2.imshow('bb',b)
+src = cv2.imread('../img_1.jpg')
+src = cv2.cvtColor(src, cv2.COLOR_RGB2GRAY)
+cv2.imshow('src', src)
+img_lbp = lbp(src)
+cv2.imshow('bb',img_lbp)
 cv2.waitKey()
